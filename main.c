@@ -148,8 +148,8 @@ void plus(list *tail11,list *tail22){
     }
     refresh(&head_result,&tail_result);
 }
-void minus(list *tail_1,list *tail_2){
-    plus(tail_1,NULL);
+void minus(list *tail_2){
+    //plus(tail_1,NULL);
     list *p=tail_result;
     while(tail_2!=NULL){
         (p->data)-=tail_2->data;
@@ -174,6 +174,37 @@ void multiply(list *tail_1,list **h,list **t){
         decrease_by_one(h,t);
     }
 }
+void multiply2(list *tail_1,list *tail_2){
+    list *p=tail_1,*p2,*p3;
+    int i,j;
+    while(p!=NULL){
+        add_to_start(generate_node_list('0'),&head_result,&tail_result);
+        p=p->prev;
+    }
+    p=tail_2;
+    while(p!=NULL){
+        add_to_start(generate_node_list('0'),&head_result,&tail_result);
+        p=p->prev;
+    }
+    for(p=tail_1,i=0;p!=NULL;i++,p=p->prev){
+        p3=tail_result;
+        for(j=0;j<i;j++)
+            p3=p3->prev;
+        for(p2=tail_2;p2!=NULL;p2=p2->prev){
+            p3->data+=p->data*p2->data;
+            p3=p3->prev;
+        }
+        refresh(&head_result,&tail_result);
+    }
+    p=head_result;
+    while(p->next!=NULL){
+        if(p->data==0)
+            remove_one_element_from_start(&head_result,&tail_result);
+        else
+            break;
+        p=p->next;
+    }
+}
 void increase_by_one(list **h,list **t){
     if(*h==NULL)
         add_to_start(generate_node_list('0'),h,t);
@@ -183,6 +214,10 @@ void increase_by_one(list **h,list **t){
 
 int is_bigger(list *p,list *p2){
     list *t1=p,*t2=p2;
+    while(t1!=NULL&&t1->data==0)
+        t1=t1->next;
+    while(t2!=NULL&&t2->data==0)
+        t2=t2->next;
     while(t1!=NULL&&t2!=NULL){
         t1=t1->next;
         t2=t2->next;
@@ -208,6 +243,45 @@ void division(list *h,list *h2){
     }
     decrease_by_one(&head_div,&tail_div);
 }
+void division2(list *p,list *p2,list *p2_tail){
+    list *p3;
+    while(p!=NULL){
+        add_to_end(generate_node_list(p->data+48),&head_result,&tail_result);
+        p=p->next;
+        while(p!=NULL&&is_bigger(head_result,p2)==-1){
+            add_to_end(generate_node_list(p->data+48),&head_result,&tail_result);
+            p=p->next;
+            add_to_end(generate_node_list('0'),&head_div,&tail_div);
+        }
+        int n=0;
+        while(is_bigger(head_result,p2)!=-1){
+            minus(p2_tail);
+            n++;
+        }
+        if(n)
+            add_to_end(generate_node_list(n+48),&head_div,&tail_div);
+        else
+            add_to_end(generate_node_list('0'),&head_div,&tail_div);
+        p3=head_result;
+        while(p3->next!=NULL){
+            if(p3->data==0){
+                p3=p3->next;
+                remove_one_element_from_start(&head_result,&tail_result);
+            }else
+                break;
+        }
+    }
+    p3=head_div;
+    while(p3->next!=NULL){
+        if(p3->data==0){
+            p3=p3->next;
+            remove_one_element_from_start(&head_div,&tail_div);
+        }
+        else
+            break;
+    }
+
+}
 void clean_buff(){
     while(getchar()!='\n');
 }
@@ -224,22 +298,23 @@ void run(){
         scan_list(&head,&tail);
         printf("Enter second number\n");
         scan_list(&head2,&tail2);
-        printf("Result = ");
+        printf("\nResult = ");
         switch(ch){
             case '+':
                 plus(tail,tail2);
                 print_list(head_result);
                 break;
             case '-':
-                minus(tail,tail2);
+                plus(tail,NULL);
+                minus(tail2);
                 print_list(head_result);
                 break;
             case '*':
-                multiply(tail,&head2,&tail2);
+                multiply2(tail,tail2);
                 print_list(head_result);
                 break;
             case '/':
-                division(head,tail2);
+                division2(head,head2,tail2);
                 print_list(head_div);
                 break;
         }
